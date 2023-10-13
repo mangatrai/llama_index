@@ -5,8 +5,11 @@ powered by the cassIO library
 
 """
 
-import logging
+import logging, uuid, os
 from typing import Any, Dict, Iterable, List, Optional, TypeVar, cast
+from traceloop.sdk import Traceloop
+from traceloop.sdk.tracing import tracing as Tracer
+from traceloop.sdk.decorators import workflow, task, agent
 
 from llama_index.indices.query.embedding_utils import (
     get_top_k_mmr_embeddings,
@@ -32,6 +35,15 @@ DEFAULT_INSERTION_BATCH_SIZE = 20
 
 T = TypeVar("T")
 
+"""Adding Open Telemetry Observability
+"""
+#change implementation of api key
+TRACELOOP_API_KEY=os.getenv('TRACELOOP_API_KEY')
+_logger.debug("TRACELOOP_API_KEY Value Set" + TRACELOOP_API_KEY)
+Traceloop.init(app_name="CassandraVectorStore_LlamaIndex", disable_batch=True)
+# Generate a UUID
+uuid_obj = uuid.uuid4()
+Tracer.set_correlation_id(str(uuid_obj))
 
 def _batch_iterable(iterable: Iterable[T], batch_size: int) -> Iterable[Iterable[T]]:
     this_batch = []
@@ -43,7 +55,7 @@ def _batch_iterable(iterable: Iterable[T], batch_size: int) -> Iterable[Iterable
     if this_batch:
         yield this_batch
 
-
+@agent(name="CassandraVectorStore", method_name="__init__")
 class CassandraVectorStore(VectorStore):
     """Cassandra Vector Store.
 
@@ -68,6 +80,7 @@ class CassandraVectorStore(VectorStore):
     stores_text: bool = True
     flat_metadata: bool = True
 
+    @task(name="Establish Cassandra Connection")
     def __init__(
         self,
         session: Any,
@@ -102,6 +115,7 @@ class CassandraVectorStore(VectorStore):
             metadata_indexing=("default_to_searchable", ["_node_content"]),
         )
 
+    @task(name="Adding rows to the vector store")
     def add(
         self,
         nodes: List[BaseNode],
@@ -156,6 +170,7 @@ class CassandraVectorStore(VectorStore):
 
         return node_ids
 
+    @task(name="Deleting Data From DB Tables")
     def delete(self, ref_doc_id: str, **delete_kwargs: Any) -> None:
         """
         Delete nodes using with ref_doc_id.
@@ -180,6 +195,7 @@ class CassandraVectorStore(VectorStore):
             raise NotImplementedError("Only `ExactMatchFilter` filters are supported")
         return {f.key: f.value for f in query_filters.filters}
 
+    @task(name="Query Vector Database")
     def query(self, query: VectorStoreQuery, **kwargs: Any) -> VectorStoreQueryResult:
         """Query index for top k most similar nodes.
 
