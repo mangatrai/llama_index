@@ -39,7 +39,6 @@ T = TypeVar("T")
 """
 #change implementation of api key
 TRACELOOP_API_KEY=os.getenv('TRACELOOP_API_KEY')
-_logger.debug("TRACELOOP_API_KEY Value Set" + TRACELOOP_API_KEY)
 Traceloop.init(app_name="CassandraVectorStore_LlamaIndex", disable_batch=True)
 # Generate a UUID
 uuid_obj = uuid.uuid4()
