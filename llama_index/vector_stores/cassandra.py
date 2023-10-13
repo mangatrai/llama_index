@@ -41,8 +41,8 @@ T = TypeVar("T")
 TRACELOOP_API_KEY=os.getenv('TRACELOOP_API_KEY')
 Traceloop.init(app_name="CassandraVectorStore_LlamaIndex", disable_batch=True)
 # Generate a UUID
-uuid_obj = uuid.uuid4()
-Tracer.set_correlation_id(str(uuid_obj))
+uuid_obj = str(uuid.uuid4())
+Tracer.set_correlation_id(uuid_obj)
 
 def _batch_iterable(iterable: Iterable[T], batch_size: int) -> Iterable[Iterable[T]]:
     this_batch = []
