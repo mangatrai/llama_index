@@ -1,5 +1,20 @@
 # ChangeLog
 
+## Unreleased
+
+## Unrleased
+
+### New Features
+
+- Added support for fine-tuning cross encoders (#7705)
+- Added `nb-clean` to `pre-commit` to minimize PR diffs (#8108)
+
+### Bug Fixes / Nits
+
+- Improved the `BM25Retriever` interface to accept `BaseNode` objects (#8096)
+- Fixed bug with `BM25Retriever` tokenizer not working as expected (#8096)
+- Brought mypy to pass in Python 3.8 (#8107)
+
 ## [0.8.44] - 2023-10-12
 
 ### New Features
